@@ -77,7 +77,7 @@ void application(
 }
 
 int main() {
-  graph<long long, double> G(100);
+  graph<long long, double> G;
 
   // maps a Node ID to it's coordinates (lat, lon)
   map<long long, Coordinates>  Nodes;
