@@ -136,8 +136,8 @@ int main()
   string filename;
   string startV;
 
-  cout << "Enter filename containing graph data> ";
-  cin >> filename;
+//   cout << "Enter filename containing graph data> ";
+//   cin >> filename;
   cout << endl;
 
   //
@@ -148,6 +148,29 @@ int main()
   outputGraph(G);
   
   G.dump(cout);
+  cout << endl;
+
+//   int weight = -1;
+
+//   string to, from;
+
+//   while (to != "quit"){
+//     cin >> to;
+
+//     set<string> neighbors = G.neighbors(to);
+
+//     for (const string& v : neighbors){
+//         cout << v << " ";
+//     }
+//     cout << endl;
+
+//   }
+
+  vector<string> vertices = G.getVertices();
+
+  for (string v : vertices){
+    cout << v << endl;
+  }  
 
   //
   // done:

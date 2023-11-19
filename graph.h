@@ -133,13 +133,22 @@ class graph {
                 Edge* currEdge = this->adjList[from];
 
                 while (currEdge->next){
-
+                    
                     if (currEdge->vertexId == to){
                         currEdge->edgeWeight = weight;
-                        break;
+
+                        delete newEdge;
+                        return true;
                     }
 
                     currEdge = currEdge->next;
+                }
+
+                if (currEdge->vertexId == to){
+                    currEdge->edgeWeight = weight;
+
+                    delete newEdge;
+                    return true;
                 }
 
                 currEdge->next = newEdge;
