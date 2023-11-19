@@ -242,10 +242,6 @@ class graph {
                 return S;
             }
 
-            if (!this->adjList.at(v)){
-                return S;
-            }
-
             Edge* currEdge = this->adjList.at(v);
 
             while (currEdge){
