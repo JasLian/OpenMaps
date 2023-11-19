@@ -47,8 +47,29 @@ class graph {
         //
         // default constructor:
         //
-        
         graph() {}
+
+        //
+        // destructor:
+        // frees all allocated memory of each Edge node
+        //
+        ~graph(){
+            
+            for (auto& pair : this->adjList){
+
+                Edge* currEdge = pair.second;
+                Edge* temp;
+
+                while (currEdge){
+                    
+                    temp = currEdge;
+                    currEdge = currEdge->next;
+
+                    delete temp;
+                }
+            }
+
+        }
 
         //
         // NumVertices
