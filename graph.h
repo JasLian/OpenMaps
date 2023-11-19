@@ -67,7 +67,7 @@ class graph {
         int NumEdges() const {
             int count = 0;
 
-            for (auto& pair : this->adjList){
+            for (const auto& pair : this->adjList){
                 Edge* currEdge = pair.second;
 
                 while (currEdge){
@@ -91,8 +91,8 @@ class graph {
             // is the vertex already in the graph?  If so, we do not
             // insert again otherwise Vertices may fill with duplicates:
             //
-            if (_LookupVertex(v) == 0) {
-            return false;
+            if (_LookupVertex(v) == 1) {
+                return false;
             }
 
             this->adjList.emplace(v, nullptr);
@@ -177,11 +177,11 @@ class graph {
             //
             // the vertices exist, but does the edge exist?
             //
-            if (!this->adjList[from]){
+            if (!this->adjList.at(from)){
                 return false;
             }
             
-            Edge* currEdge = this->adjList[from];
+            Edge* currEdge = this->adjList.at(from);
 
             while (currEdge){
 
@@ -212,11 +212,11 @@ class graph {
                 return S;
             }
 
-            if (!this->adjList[v]){
+            if (!this->adjList.at(v)){
                 return S;
             }
 
-            Edge* currEdge = this->adjList[v];
+            Edge* currEdge = this->adjList.at(v);
 
             while (currEdge){
                 S.insert(currEdge->vertexId);
@@ -235,9 +235,11 @@ class graph {
         vector<VertexT> getVertices() const {
             vector<VertexT> vertices;
 
-            for (VertexT& v : this->adjList){
-                vertices.push_back(v);
+            for (const auto& pair : this->adjList){
+                vertices.push_back(pair.first);
             }
+
+            return vertices;
 
         }
 
@@ -256,19 +258,20 @@ class graph {
             output << "********************* GRAPH ***********************" << endl;
 
             output << "**Num vertices: " << this->NumVertices() << endl;
-            int i = 0;
+            int i = 1;
             output << " **Vertices:" << endl;
-            for (pair<VertexT, Edge*>& p : this->adjList){
-                output << "  " << i << ". " << p.first << endl;
+            for (const auto& pair : this->adjList){
+                output << "  " << i << ". " << pair.first << endl;
+                i++;
             }
             output << endl;
 
             output << "**Num edges: " << this->NumEdges() << endl;
             output << " **Edges:" << endl;
-            for (pair<VertexT, Edge*>& p : this->adjList){
-                output << "  " << p.first << ": ";
+            for (const auto& pair : this->adjList){
+                output << "  " << pair.first << ": ";
 
-                Edge* currEdge = p.second;
+                Edge* currEdge = pair.second;
 
                 if (!currEdge){
                     output << "(None)\n";
@@ -276,7 +279,8 @@ class graph {
                 else{
 
                     while (currEdge){
-                        output << "(" << p.first << "," << currEdge->vertexId << "," << currEdge->edgeWeight << ") ";
+                        output << "(" << pair.first << "," << currEdge->vertexId << "," << currEdge->edgeWeight << ") ";
+                        currEdge = currEdge->next;
                     }
                     output << endl;
                 }

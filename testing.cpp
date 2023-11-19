@@ -132,7 +132,7 @@ void outputGraph(graph<string,int>& G)
 
 int main()
 {
-  graph<string,int> G(26);
+  graph<string,int> G;
   string filename;
   string startV;
 
@@ -143,7 +143,7 @@ int main()
   //
   // Let's input the graph, and then output to see what we have:
   //
-  buildGraph(filename, G);
+  buildGraph("graph.txt", G);
   
   outputGraph(G);
   
