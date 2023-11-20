@@ -17,3 +17,6 @@ clean:
 
 valgrind:
 	valgrind --tool=memcheck --leak-check=yes ./application.exe
+
+solution:
+	./maps_solution.out
