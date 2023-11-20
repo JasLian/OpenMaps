@@ -143,13 +143,37 @@ int main() {
     // TO DO: build the graph, output stats:
     //
 
+    for (auto& pair : Nodes){
+        G.addVertex(pair.first);
+    }
 
-    // cout << "# of vertices: " << G.NumVertices() << endl;
-    // cout << "# of edges: " << G.NumEdges() << endl;
+    for (FootwayInfo& path : Footways){
+
+        int nodeCount = path.Nodes.size();
+
+        for (int i = 0; i < nodeCount - 1; i++){
+
+            long long node1 = path.Nodes.at(i), node2 = path.Nodes.at(i + 1);
+            double dist = distBetween2Points(Nodes[node1].Lat, Nodes[node1].Lon, Nodes[node2].Lat, Nodes[node2].Lon);
+
+            if (!G.addEdge(node1, node2, dist)){
+                cout << "Unable to add path from " << node1 << " to " << node2 << "(" << dist << ")\n";
+            }
+
+            if (!G.addEdge(node2, node1, dist)){
+                cout << "Unable to add path from " << node2 << " to " << node1 << "(" << dist << ")\n";
+            }
+
+        }
+    }
+
+
+    cout << "# of vertices: " << G.NumVertices() << endl;
+    cout << "# of edges: " << G.NumEdges() << endl;
     cout << endl;
 
     // Execute Application
-    application(Nodes, Footways, Buildings, G);
+    // application(Nodes, Footways, Buildings, G);
 
     //
     // done:
