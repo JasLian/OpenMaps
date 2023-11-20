@@ -40,6 +40,51 @@
 using namespace std;
 using namespace tinyxml2;
 
+void findBuildings(const vector<BuildingInfo>& Buildings, 
+                          string person1Building, string person2Building, 
+                          BuildingInfo& building1, BuildingInfo& building2,
+                          bool& build1Found, bool& build2Found){
+
+    for (BuildingInfo building : Buildings){
+
+        if (building.Abbrev == person1Building && !build1Found){
+            building1 = building;
+            build1Found = true;
+        }
+
+        if (building.Abbrev == person2Building && !build2Found){
+            building2 = building;
+            build2Found = true;
+        }
+    }
+
+    if (!build1Found || !build2Found){
+
+        for (BuildingInfo building : Buildings){
+
+            if (building.Fullname.find(person1Building) != string::npos && !build1Found){
+                building1 = building;
+                build1Found = true;
+            }
+
+            if (building.Fullname.find(person2Building) != string::npos && !build2Found){
+                building2 = building;
+                build2Found = true;
+            }
+        }
+    }
+}
+
+void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building2){
+    cout << "Person 1's point:\n "
+                 << building1.Fullname << endl
+                 << " (" << building1.Coords.Lat << "," << building1.Coords.Lon << ")\n";
+            
+    cout << "Person 2's point:\n "
+            << building2.Fullname << endl
+            << " (" << building2.Coords.Lat << "," << building2.Coords.Lon << ")\n";
+}
+
 //
 // Implement your standard application here
 //
@@ -57,7 +102,20 @@ void application(
         cout << "Enter person 2's building (partial name or abbreviation)> ";
         getline(cin, person2Building);
 
+        BuildingInfo building1, building2;
+        bool build1Found = false, build2Found = false;
+        findBuildings(Buildings, person1Building, person2Building, building1, building2, build1Found, build2Found);
 
+        if (!build1Found){
+            cout << "Person 1's building not found\n";
+        }
+        else if (!build2Found){
+            cout << "Person 2's building not found\n";
+        }
+
+        if (build1Found && build2Found){
+            outputBuildings(building1, building2);
+        }
         //
         // TO DO: lookup buildings, find nearest start and dest nodes, find center
         // run Dijkstra's alg from each start, output distances and paths to destination:
@@ -173,7 +231,7 @@ int main() {
     cout << endl;
 
     // Execute Application
-    // application(Nodes, Footways, Buildings, G);
+    application(Nodes, Footways, Buildings, G);
 
     //
     // done:
