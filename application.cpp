@@ -75,7 +75,36 @@ void findBuildings(const vector<BuildingInfo>& Buildings,
     }
 }
 
-void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building2){
+BuildingInfo findDestinationBuilding(const vector<BuildingInfo>& Buildings, 
+                                     const BuildingInfo& building1, const BuildingInfo& building2,
+                                     set<string>& usedBuildings){
+
+    Coordinates center = centerBetween2Points(building1.Coords.Lat, building1.Coords.Lon, building2.Coords.Lat, building2.Coords.Lon);
+    BuildingInfo centerBuilding = Buildings.at(0);
+    double closestDist = distBetween2Points(centerBuilding.Coords.Lat, centerBuilding.Coords.Lon, center.Lat, center.Lon);
+
+    BuildingInfo dest;
+
+    double dist;
+    for (const BuildingInfo& building : Buildings){
+
+        if (usedBuildings.count(building.Fullname)) continue;
+
+        dist = distBetween2Points(building.Coords.Lat, building.Coords.Lon, center.Lat, center.Lon);
+        
+        if (dist < closestDist){
+            centerBuilding = building;
+            closestDist = dist;
+        }
+        
+    }
+
+    usedBuildings.emplace(dest.Fullname);
+    return dest;
+    
+}
+
+void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building2, const BuildingInfo& dest){
     cout << "Person 1's point:\n "
                  << building1.Fullname << endl
                  << " (" << building1.Coords.Lat << "," << building1.Coords.Lon << ")\n";
@@ -83,6 +112,11 @@ void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building
     cout << "Person 2's point:\n "
             << building2.Fullname << endl
             << " (" << building2.Coords.Lat << "," << building2.Coords.Lon << ")\n";
+
+    cout << "Nearest destination node\n "
+            << dest.Fullname << endl
+            << " (" << dest.Coords.Lat << "," << dest.Coords.Lon << ")\n";
+        
 }
 
 //
@@ -108,14 +142,17 @@ void application(
 
         if (!build1Found){
             cout << "Person 1's building not found\n";
+            continue;
         }
         else if (!build2Found){
             cout << "Person 2's building not found\n";
+            continue;
         }
 
-        if (build1Found && build2Found){
-            outputBuildings(building1, building2);
-        }
+        set<string> usedBuildings;
+        BuildingInfo destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings);
+        outputBuildings(building1, building2, destination);
+
         //
         // TO DO: lookup buildings, find nearest start and dest nodes, find center
         // run Dijkstra's alg from each start, output distances and paths to destination:
