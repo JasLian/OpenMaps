@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <queue>
 
 #include "tinyxml2.h"
 #include "dist.h"
@@ -39,6 +40,8 @@
 
 using namespace std;
 using namespace tinyxml2;
+
+const double INF = numeric_limits<double>::max();
 
 void findBuildings(const vector<BuildingInfo>& Buildings, 
                           string person1Building, string person2Building, 
@@ -83,8 +86,6 @@ BuildingInfo findDestinationBuilding(const vector<BuildingInfo>& Buildings,
     BuildingInfo centerBuilding = Buildings.at(0);
     double closestDist = distBetween2Points(centerBuilding.Coords.Lat, centerBuilding.Coords.Lon, center.Lat, center.Lon);
 
-    BuildingInfo dest;
-
     double dist;
     for (const BuildingInfo& building : Buildings){
 
@@ -99,29 +100,82 @@ BuildingInfo findDestinationBuilding(const vector<BuildingInfo>& Buildings,
         
     }
 
-    usedBuildings.emplace(dest.Fullname);
-    return dest;
+    usedBuildings.emplace(centerBuilding.Fullname);
+    return centerBuilding;
     
 }
 
 void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building2, const BuildingInfo& dest){
     cout << "Person 1's point:\n "
                  << building1.Fullname << endl
-                 << " (" << building1.Coords.Lat << "," << building1.Coords.Lon << ")\n";
+                 << " (" << building1.Coords.Lat << ", " << building1.Coords.Lon << ")\n";
             
     cout << "Person 2's point:\n "
             << building2.Fullname << endl
-            << " (" << building2.Coords.Lat << "," << building2.Coords.Lon << ")\n";
+            << " (" << building2.Coords.Lat << ", " << building2.Coords.Lon << ")\n";
 
     cout << "Nearest destination node\n "
             << dest.Fullname << endl
-            << " (" << dest.Coords.Lat << "," << dest.Coords.Lon << ")\n";
+            << " (" << dest.Coords.Lat << ", " << dest.Coords.Lon << ")\n";
         
 }
 
-//
-// Implement your standard application here
-//
+void findNearestNodes(vector<FootwayInfo>& Footways, map<long long, Coordinates>& allNodes,
+                      const BuildingInfo building1, const BuildingInfo building2, const BuildingInfo center, 
+                      vector<long long>& closestNodes){
+
+    long long closestNode1, closestNode2, closestNode3;
+    double closestDist1 = distBetween2Points(building1.Coords.Lat, building1.Coords.Lon, allNodes[Footways.at(0).Nodes.at(0)].Lat, allNodes[Footways.at(0).Nodes.at(0)].Lon),
+           closestDist2 = distBetween2Points(building2.Coords.Lat, building2.Coords.Lon, allNodes[Footways.at(0).Nodes.at(0)].Lat, allNodes[Footways.at(0).Nodes.at(0)].Lon),
+           closestDist3 = distBetween2Points(center.Coords.Lat, center.Coords.Lon, allNodes[Footways.at(0).Nodes.at(0)].Lat, allNodes[Footways.at(0).Nodes.at(0)].Lon);
+
+    double dist;
+    for (const FootwayInfo& way : Footways){
+
+        for (const long long& node : way.Nodes){
+
+            dist = distBetween2Points(building1.Coords.Lat, building1.Coords.Lon, allNodes[node].Lat, allNodes[node].Lon);
+            if (dist < closestDist1){
+                closestDist1 = dist;
+                closestNode1 = node;
+            }
+
+            dist = distBetween2Points(building2.Coords.Lat, building2.Coords.Lon, allNodes[node].Lat, allNodes[node].Lon);
+            if (dist < closestDist2){
+                closestDist2 = dist;
+                closestNode2 = node;
+            }
+
+            dist = distBetween2Points(center.Coords.Lat, center.Coords.Lon, allNodes[node].Lat, allNodes[node].Lon);
+            if (dist < closestDist3){
+                closestDist3 = dist;
+                closestNode3 = node;
+            }
+        }
+    
+    }
+
+    closestNodes.push_back(closestNode1);
+    closestNodes.push_back(closestNode2);
+    closestNodes.push_back(closestNode3);
+}
+
+void outputClosestNodes(vector<long long>& closestNodes, map<long long, Coordinates>& Nodes){
+
+    cout << "Nearest P1 node:\n"
+         << " " << closestNodes.at(0) << endl
+         << " (" << Nodes[closestNodes.at(0)].Lat << ", " << Nodes[closestNodes.at(0)].Lon << ")\n";
+
+    cout << "Nearest P1 node:\n"
+         << " " << closestNodes.at(1) << endl
+         << " (" << Nodes[closestNodes.at(1)].Lat << ", " << Nodes[closestNodes.at(1)].Lon << ")\n";
+
+    cout << "Nearest P1 node:\n"
+         << " " << closestNodes.at(2) << endl
+         << " (" << Nodes[closestNodes.at(2)].Lat << ", " << Nodes[closestNodes.at(2)].Lon << ")\n";
+
+}
+
 void application(
     map<long long, Coordinates>& Nodes, vector<FootwayInfo>& Footways,
     vector<BuildingInfo>& Buildings, graph<long long, double>& G) {
@@ -151,7 +205,13 @@ void application(
 
         set<string> usedBuildings;
         BuildingInfo destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings);
+
+        vector<long long> nearestNodes;
+        findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
+
         outputBuildings(building1, building2, destination);
+        cout << endl;
+        outputClosestNodes(nearestNodes, Nodes);
 
         //
         // TO DO: lookup buildings, find nearest start and dest nodes, find center
