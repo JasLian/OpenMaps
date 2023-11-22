@@ -80,7 +80,7 @@ void findBuildings(const vector<BuildingInfo>& Buildings,
 
 BuildingInfo findDestinationBuilding(const vector<BuildingInfo>& Buildings, 
                                      const BuildingInfo& building1, const BuildingInfo& building2,
-                                     set<string>& usedBuildings){
+                                     set<string>& usedBuildings, set<string> unreachableBuildings){
 
     Coordinates center = centerBetween2Points(building1.Coords.Lat, building1.Coords.Lon, building2.Coords.Lat, building2.Coords.Lon);
     BuildingInfo centerBuilding = Buildings.at(0);
@@ -89,7 +89,7 @@ BuildingInfo findDestinationBuilding(const vector<BuildingInfo>& Buildings,
     double dist;
     for (const BuildingInfo& building : Buildings){
 
-        if (usedBuildings.count(building.Fullname)) continue;
+        if (usedBuildings.count(building.Fullname) || unreachableBuildings.count(building.Fullname)) continue;
 
         dist = distBetween2Points(building.Coords.Lat, building.Coords.Lon, center.Lat, center.Lon);
         
@@ -204,24 +204,39 @@ void application(
         }
 
         set<string> usedBuildings;
-        BuildingInfo destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings);
+        set<string> unreachableBuildings;
 
+        BuildingInfo destination;
+        bool reachable = false, destReach1 = false, destReach2 = false;
         vector<long long> nearestNodes;
-        findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
+        map<long long, long long> predecessors;
+        map<long long, double> distance; 
+        vector<long long> path;
+        do{
+
+            nearestNodes.clear();
+            destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings, unreachableBuildings);
+            findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
+
+            // reachable = dijkstra(building1, building2, G);
+            // if (!reachable){
+            //     cout << "Sorry, destination unreachable.\n";
+            //     return;
+            // }
+
+            // destReach1 = dijkstra(building1, destination, G);
+            // if (!destReach1) continue;
+
+            // destReach2 = dijkstra(building2, destination, G);
+            // if (!destReach2) continue;
+
+
+        } while (destReach1 && destReach2);
+        
 
         outputBuildings(building1, building2, destination);
         cout << endl;
         outputClosestNodes(nearestNodes, Nodes);
-
-        //
-        // TO DO: lookup buildings, find nearest start and dest nodes, find center
-        // run Dijkstra's alg from each start, output distances and paths to destination:
-        //
-
-
-        // cout << "Person 1's building not found" << endl;
-        // cout << "Person 2's building not found" << endl;
-
 
         //
         // another navigation?
