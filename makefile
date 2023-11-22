@@ -20,3 +20,8 @@ valgrind:
 
 solution:
 	./maps_solution.out
+
+blank:
+	rm -f blank.exe
+	g++ blank.cpp -o blank.exe; ./blank.exe
+	
