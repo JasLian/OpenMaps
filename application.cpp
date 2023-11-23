@@ -43,6 +43,14 @@ using namespace tinyxml2;
 
 const double INF = numeric_limits<double>::max();
 
+class prioritize {
+    public:
+        bool operator()(const pair<long long, double>& p1, const pair<long long, double>& p2) const
+        {
+            return p1.second < p2.second; 
+        }
+};
+
 void findBuildings(const vector<BuildingInfo>& Buildings, 
                           string person1Building, string person2Building, 
                           BuildingInfo& building1, BuildingInfo& building2,
@@ -176,6 +184,52 @@ void outputClosestNodes(vector<long long>& closestNodes, map<long long, Coordina
 
 }
 
+bool dijkstra(const long long& start, const graph<long long, double>& graph, 
+              map<long long, long long>& predecessors, map<long long, double>& distance){
+
+    vector<long long> vertices = graph.getVertices();
+    priority_queue<pair<long long, double>, vector<pair<long long, double>>, prioritize> unvisitedQueue;
+    for (long long& vertex : vertices){
+        distance[vertex] = INF;
+        predecessors[vertex] = -1;
+        unvisitedQueue.push(pair(vertex, INF));
+    }
+    distance[start] = 0;
+    unvisitedQueue.push(pair(start, 0));
+
+    set<long long> visited;
+
+    while (!unvisitedQueue.empty()){
+        pair<long long, double> current = unvisitedQueue.top();
+        unvisitedQueue.pop();
+
+        if (current.second == INF){
+            break;
+        }
+        else if (visited.count(current.first)){
+            continue;
+        }
+        
+        set<long long> neighbors = graph.neighbors(current.first);
+        double currentDistance = INF;
+        for (const long long& vertex : neighbors){
+            graph.getWeight(current.first, vertex, currentDistance);
+
+            double currentTotalDistance = distance[vertex];
+            double altTotalDistance = (currentTotalDistance != INF) ? currentTotalDistance + currentDistance : currentDistance;
+
+            if (altTotalDistance < currentTotalDistance || currentTotalDistance == INF){
+                distance[vertex] = altTotalDistance;
+                predecessors[vertex] = current.first;
+                unvisitedQueue.push(pair(vertex, altTotalDistance));
+            }
+        }
+
+    }
+
+    return true;
+} 
+
 void application(
     map<long long, Coordinates>& Nodes, vector<FootwayInfo>& Footways,
     vector<BuildingInfo>& Buildings, graph<long long, double>& G) {
@@ -207,28 +261,25 @@ void application(
         set<string> unreachableBuildings;
 
         BuildingInfo destination;
-        bool reachable = false, destReach1 = false, destReach2 = false;
+        bool reachable = true, destReach1 = true, destReach2 = false;
         vector<long long> nearestNodes;
         map<long long, long long> predecessors;
         map<long long, double> distance; 
-        vector<long long> path;
+        vector<long long> path1, path2;
         do{
-
+            
             nearestNodes.clear();
             destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings, unreachableBuildings);
             findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
 
-            // reachable = dijkstra(building1, building2, G);
-            // if (!reachable){
-            //     cout << "Sorry, destination unreachable.\n";
-            //     return;
-            // }
+            // reachable = dijkstra(nearestNodes.at(0), G, predecessors, distance);
+            if (!reachable) break;
 
-            // destReach1 = dijkstra(building1, destination, G);
-            // if (!destReach1) continue;
+            // destReach1 = dijkstra(nearestNodes.at(0), G, predecessors, distance);
+            if (!destReach1) continue;
 
-            // destReach2 = dijkstra(building2, destination, G);
-            // if (!destReach2) continue;
+            // destReach2 = dijkstra(nearestNodes.at(1), G, predecessors, distance);
+            if (!destReach2) continue;
 
 
         } while (destReach1 && destReach2);
@@ -237,6 +288,10 @@ void application(
         outputBuildings(building1, building2, destination);
         cout << endl;
         outputClosestNodes(nearestNodes, Nodes);
+
+        if (!reachable){
+            cout << "Sorry, destination unreachable.\n";
+        }
 
         //
         // another navigation?
