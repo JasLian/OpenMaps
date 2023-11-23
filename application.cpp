@@ -209,12 +209,15 @@ void dijkstra(const long long& start, const graph<long long, double>& graph,
         else if (visited.count(current.first)){
             continue;
         }
+
+        //TO DO: add current node to visited set
         
         set<long long> neighbors = graph.neighbors(current.first);
         double currentDistance = INF;
         for (const long long& vertex : neighbors){
             graph.getWeight(current.first, vertex, currentDistance);
 
+            //TO DO: fix distance calculations
             double currentTotalDistance = distance[vertex];
             double altTotalDistance = (currentTotalDistance != INF) ? currentTotalDistance + currentDistance : currentDistance;
 
