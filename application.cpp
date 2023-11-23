@@ -184,7 +184,7 @@ void outputClosestNodes(vector<long long>& closestNodes, map<long long, Coordina
 
 }
 
-bool dijkstra(const long long& start, const graph<long long, double>& graph, 
+void dijkstra(const long long& start, const graph<long long, double>& graph, 
               map<long long, long long>& predecessors, map<long long, double>& distance){
 
     vector<long long> vertices = graph.getVertices();
@@ -227,8 +227,16 @@ bool dijkstra(const long long& start, const graph<long long, double>& graph,
 
     }
 
-    return true;
 } 
+
+bool buildPath(long long& destination, vector<long long> path, double totDistance, 
+               map<long long, long long>& predecessors, 
+               map<long long, double>& distance){
+
+    if (distance[destination] == INF) return false;
+
+    return true;
+}
 
 void application(
     map<long long, Coordinates>& Nodes, vector<FootwayInfo>& Footways,
@@ -259,26 +267,34 @@ void application(
 
         set<string> usedBuildings;
         set<string> unreachableBuildings;
-
         BuildingInfo destination;
-        bool reachable = true, destReach1 = true, destReach2 = false;
         vector<long long> nearestNodes;
+
         map<long long, long long> predecessors;
         map<long long, double> distance; 
         vector<long long> path1, path2;
+        bool reachable = true, destReach1 = true, destReach2 = false;
+        double path1Distance, path2Distance;
+
         do{
             
             nearestNodes.clear();
             destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings, unreachableBuildings);
             findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
 
-            // reachable = dijkstra(nearestNodes.at(0), G, predecessors, distance);
+            dijkstra(nearestNodes.at(0), G, predecessors, distance);
+            vector<long long> reachablePath;
+            double reachableDistance = INF;
+            // reachable = buildPath(nearestNodes.at(1), reachablePath, reachableDistance, predecessors, distance);
             if (!reachable) break;
 
-            // destReach1 = dijkstra(nearestNodes.at(0), G, predecessors, distance);
+
+            dijkstra(nearestNodes.at(0), G, predecessors, distance);
+            // destReach1 = buildPath(nearestNodes.at(2), reachablePath, path1Distance, predecessors, distance);
             if (!destReach1) continue;
 
-            // destReach2 = dijkstra(nearestNodes.at(1), G, predecessors, distance);
+            dijkstra(nearestNodes.at(1), G, predecessors, distance);
+            // destReach2 = buildPath(nearestNodes.at(2), reachablePath, path2Distance, predecessors, distance);
             if (!destReach2) continue;
 
 
