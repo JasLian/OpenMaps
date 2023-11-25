@@ -73,11 +73,27 @@ class graph {
             }
         }
 
-        graph& operator=(const graph& other){
+        graph operator=(const graph& other){
             this->~graph();
 
-            graph<VertexT, WeightT> copy{other};
-            return copy;
+            vector<VertexT> vertices = other.getVertices();
+            for (VertexT vertex : vertices){
+                this->addVertex(vertex);
+            }
+
+            for (VertexT vertex : vertices){
+
+                set<VertexT> neighbors = other.neighbors(vertex);
+
+                for (VertexT n : neighbors){
+                    WeightT weight;
+                    other.getWeight(vertex, n, weight);
+
+                    this->addEdge(vertex, n, weight);
+                }
+            }
+
+            return *(this);
         }
 
         //
