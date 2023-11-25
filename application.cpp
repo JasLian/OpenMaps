@@ -25,8 +25,6 @@
 #include <iostream>
 #include <iomanip>  /*setprecision*/
 #include <string>
-#include <vector>
-#include <map>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
@@ -124,7 +122,7 @@ void outputBuildings(const BuildingInfo& building1, const BuildingInfo& building
             << building2.Fullname << endl
             << " (" << building2.Coords.Lat << ", " << building2.Coords.Lon << ")\n";
 
-    cout << "Nearest destination node\n "
+    cout << "Destination Building:\n "
             << dest.Fullname << endl
             << " (" << dest.Coords.Lat << ", " << dest.Coords.Lon << ")\n";
         
@@ -180,7 +178,7 @@ void outputClosestNodes(vector<long long>& closestNodes, map<long long, Coordina
          << " " << closestNodes.at(1) << endl
          << " (" << Nodes[closestNodes.at(1)].Lat << ", " << Nodes[closestNodes.at(1)].Lon << ")\n";
 
-    cout << "Nearest destination to dest:\n"
+    cout << "Nearest destination node:\n"
          << " " << closestNodes.at(2) << endl
          << " (" << Nodes[closestNodes.at(2)].Lat << ", " << Nodes[closestNodes.at(2)].Lon << ")\n";
 
@@ -287,67 +285,67 @@ void application(
 
         if (!build1Found){
             cout << "Person 1's building not found\n";
-            continue;
         }
         else if (!build2Found){
             cout << "Person 2's building not found\n";
-            continue;
-        }
-
-        set<string> usedBuildings;
-        set<string> unreachableBuildings;
-        BuildingInfo destination;
-        vector<long long> nearestNodes;
-
-        map<long long, long long> predecessors;
-        map<long long, double> distance; 
-        stack<long long> path1, path2;
-        bool reachable = false, destReach1 = false, destReach2 = false;
-        double path1Distance = INF, path2Distance = INF;
-
-        do{
-            
-            nearestNodes.clear();
-            destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings, unreachableBuildings);
-            findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
-
-            dijkstra(nearestNodes.at(0), G, predecessors, distance);
-            stack<long long> reachablePath;
-            double reachableDistance = INF;
-            reachable = buildPath(nearestNodes.at(1), reachablePath, reachableDistance, predecessors, distance);
-            if (!reachable) break;
-            predecessors.clear();
-            distance.clear();
-
-            dijkstra(nearestNodes.at(0), G, predecessors, distance);
-            destReach1 = buildPath(nearestNodes.at(2), path1, path1Distance, predecessors, distance);
-            if (!destReach1) continue;
-            predecessors.clear();
-            distance.clear();
-
-            dijkstra(nearestNodes.at(1), G, predecessors, distance);
-            destReach2 = buildPath(nearestNodes.at(2), path2, path2Distance, predecessors, distance);
-            if (!destReach2) continue;
-            predecessors.clear();
-            distance.clear();
-
-        } while (!destReach1 && !destReach2);
-        
-        outputBuildings(building1, building2, destination);
-        cout << endl;
-        outputClosestNodes(nearestNodes, Nodes);
-
-        if (!reachable){
-            cout << "\nSorry, destination unreachable.\n";
         }
         else{
-            cout << "\nPerson 1's distance to dest: " << path1Distance << " miles\n";
-            printPath(path1);
+            set<string> usedBuildings;
+            set<string> unreachableBuildings;
+            BuildingInfo destination;
+            vector<long long> nearestNodes;
 
-            cout << "\nPerson 2's distance to dest: " << path2Distance << " miles\n";
-            printPath(path2);
+            map<long long, long long> predecessors;
+            map<long long, double> distance; 
+            stack<long long> path1, path2;
+            bool reachable = false, destReach1 = false, destReach2 = false;
+            double path1Distance = INF, path2Distance = INF;
+
+            do{
+                
+                nearestNodes.clear();
+                destination = findDestinationBuilding(Buildings, building1, building2, usedBuildings, unreachableBuildings);
+                findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
+
+                dijkstra(nearestNodes.at(0), G, predecessors, distance);
+                stack<long long> reachablePath;
+                double reachableDistance = INF;
+                reachable = buildPath(nearestNodes.at(1), reachablePath, reachableDistance, predecessors, distance);
+                if (!reachable) break;
+                predecessors.clear();
+                distance.clear();
+
+                dijkstra(nearestNodes.at(0), G, predecessors, distance);
+                destReach1 = buildPath(nearestNodes.at(2), path1, path1Distance, predecessors, distance);
+                if (!destReach1) continue;
+                predecessors.clear();
+                distance.clear();
+
+                dijkstra(nearestNodes.at(1), G, predecessors, distance);
+                destReach2 = buildPath(nearestNodes.at(2), path2, path2Distance, predecessors, distance);
+                if (!destReach2) continue;
+                predecessors.clear();
+                distance.clear();
+
+            } while (!destReach1 && !destReach2);
+            
+            outputBuildings(building1, building2, destination);
+            cout << endl;
+            outputClosestNodes(nearestNodes, Nodes);
+
+            if (!reachable){
+                cout << "\nSorry, destination unreachable.\n";
+            }
+            else{
+                cout << "\nPerson 1's distance to dest: " << path1Distance << " miles\n";
+                printPath(path1);
+
+                cout << "\nPerson 2's distance to dest: " << path2Distance << " miles\n";
+                printPath(path2);
+            }
         }
         
+
         cout << endl;
         cout << "Enter person 1's building (partial name or abbreviation), or #> ";
         getline(cin, person1Building);
@@ -414,11 +412,6 @@ int main() {
     cout << "# of nodes: " << Nodes.size() << endl;
     cout << "# of footways: " << Footways.size() << endl;
     cout << "# of buildings: " << Buildings.size() << endl;
-
-
-    //
-    // TO DO: build the graph, output stats:
-    //
 
     for (auto& pair : Nodes){
         G.addVertex(pair.first);
