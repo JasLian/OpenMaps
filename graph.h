@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <vector>
 #include <set>
+#include <map>
 
 using namespace std;
 
@@ -50,6 +51,34 @@ class graph {
         // default constructor:
         //
         graph() {}
+
+        graph(const graph& other){
+            this->~graph();
+
+            vector<VertexT> vertices = other.getVertices();
+            for (VertexT vertex : vertices){
+                this->addVertex(vertex);
+            }
+
+            for (VertexT vertex : vertices){
+
+                set<VertexT> neighbors = other.neighbors(vertex);
+
+                for (VertexT n : neighbors){
+                    WeightT weight;
+                    other.getWeight(vertex, n, weight);
+
+                    this->addEdge(vertex, n, weight);
+                }
+            }
+        }
+
+        graph& operator=(const graph& other){
+            this->~graph();
+
+            graph<VertexT, WeightT> copy{other};
+            return copy;
+        }
 
         //
         // destructor:
@@ -135,8 +164,6 @@ class graph {
             newEdge->edgeWeight = weight;
             newEdge->vertexId = to;
 
-            this->totEdges++;
-
             if (!this->adjList.at(from)){
                 this->adjList.at(from) = newEdge;
             }
@@ -167,6 +194,7 @@ class graph {
 
             }
 
+            this->totEdges++;
             return true;
         }
 
