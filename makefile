@@ -1,6 +1,6 @@
 build:
 	rm -f application.exe
-	g++ -std=c++20 -Wall application.cpp dist.cpp osm.cpp tinyxml2.cpp -o application.exe
+	g++ -std=c++20 -Wall -g application.cpp dist.cpp osm.cpp tinyxml2.cpp -o application.exe
 
 run:
 	./application.exe
@@ -23,5 +23,5 @@ solution:
 
 blank:
 	rm -f blank.exe
-	g++ blank.cpp -o blank.exe; ./blank.exe
+	g++ blank.cpp -g -o blank.exe; ./blank.exe
 	
