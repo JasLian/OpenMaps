@@ -6,7 +6,7 @@ using namespace std;
 int main(){
 
     graph<char, int> test;
-    for (int i = 0; i < 26; i++){
+    for (int i = 0; i < 10; i++){
         test.addVertex('a' + i);
     }
 
@@ -18,7 +18,7 @@ int main(){
     test.dump(cout);
 
     graph<char, int> copy;
-    for (int i = 0; i < 26; i++){
+    for (int i = 0; i < 20; i++){
         copy.addVertex('a' + i);
     }
 
@@ -26,10 +26,9 @@ int main(){
     for (int i = 0; i < 100; i++){
         copy.addEdge('a' + (rand() & 26), 'a' + (rand() % 26), i);
     }
-    cout << "\n\n";
-    copy.dump(cout);
+    
+    cout << (copy.NumVertices() == test.NumVertices()) << endl;
 
     copy = test;
-    cout << "\n\n";
-    copy.dump(cout);
+    cout << (copy.NumVertices() == test.NumVertices()) << endl;
 }
