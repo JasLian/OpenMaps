@@ -31,6 +31,8 @@
 #include <cstring>
 #include <cassert>
 #include <queue>
+#include <stack>
+#include <fstream>
 
 #include "tinyxml2.h"
 #include "dist.h"
@@ -47,7 +49,7 @@ class prioritize {
     public:
         bool operator()(const pair<long long, double>& p1, const pair<long long, double>& p2) const
         {
-            return p1.second < p2.second; 
+            return p1.second > p2.second; 
         }
 };
 
@@ -174,11 +176,11 @@ void outputClosestNodes(vector<long long>& closestNodes, map<long long, Coordina
          << " " << closestNodes.at(0) << endl
          << " (" << Nodes[closestNodes.at(0)].Lat << ", " << Nodes[closestNodes.at(0)].Lon << ")\n";
 
-    cout << "Nearest P1 node:\n"
+    cout << "Nearest P2 node:\n"
          << " " << closestNodes.at(1) << endl
          << " (" << Nodes[closestNodes.at(1)].Lat << ", " << Nodes[closestNodes.at(1)].Lon << ")\n";
 
-    cout << "Nearest P1 node:\n"
+    cout << "Nearest destination to dest:\n"
          << " " << closestNodes.at(2) << endl
          << " (" << Nodes[closestNodes.at(2)].Lat << ", " << Nodes[closestNodes.at(2)].Lon << ")\n";
 
@@ -198,7 +200,7 @@ void dijkstra(const long long& start, const graph<long long, double>& graph,
     unvisitedQueue.push(pair(start, 0));
 
     set<long long> visited;
-
+    
     while (!unvisitedQueue.empty()){
         pair<long long, double> current = unvisitedQueue.top();
         unvisitedQueue.pop();
@@ -210,35 +212,59 @@ void dijkstra(const long long& start, const graph<long long, double>& graph,
             continue;
         }
 
-        //TO DO: add current node to visited set
+        visited.emplace(current.first);
         
         set<long long> neighbors = graph.neighbors(current.first);
+
         double currentDistance = INF;
         for (const long long& vertex : neighbors){
+
             graph.getWeight(current.first, vertex, currentDistance);
-
-            //TO DO: fix distance calculations
             double currentTotalDistance = distance[vertex];
-            double altTotalDistance = (currentTotalDistance != INF) ? currentTotalDistance + currentDistance : currentDistance;
+            double altTotalDistance = current.second + currentDistance;
 
-            if (altTotalDistance < currentTotalDistance || currentTotalDistance == INF){
+            if (altTotalDistance < currentTotalDistance){
                 distance[vertex] = altTotalDistance;
                 predecessors[vertex] = current.first;
                 unvisitedQueue.push(pair(vertex, altTotalDistance));
             }
+
         }
 
     }
 
 } 
 
-bool buildPath(long long& destination, vector<long long> path, double totDistance, 
+bool buildPath(long long& destination, stack<long long>& path, double& totDistance, 
                map<long long, long long>& predecessors, 
                map<long long, double>& distance){
 
-    if (distance[destination] == INF) return false;
+    totDistance = distance[destination];
+    if (totDistance == INF) return false;
+
+    path.push(destination);
+    long long predNode = predecessors[destination];
+
+    while (predNode != -1){
+        path.push(predNode);
+        predNode = predecessors[predNode];
+    }
 
     return true;
+}
+
+void printPath(stack<long long> path){
+
+    cout << "Path: " << path.top();
+    path.pop();
+
+    while (!path.empty()){
+        cout << "->" << path.top();
+        path.pop();
+    }
+
+    cout << endl;
+
 }
 
 void application(
@@ -275,9 +301,9 @@ void application(
 
         map<long long, long long> predecessors;
         map<long long, double> distance; 
-        vector<long long> path1, path2;
-        bool reachable = true, destReach1 = true, destReach2 = false;
-        double path1Distance, path2Distance;
+        stack<long long> path1, path2;
+        bool reachable = false, destReach1 = false, destReach2 = false;
+        double path1Distance = INF, path2Distance = INF;
 
         do{
             
@@ -286,35 +312,42 @@ void application(
             findNearestNodes(Footways, Nodes, building1, building2, destination, nearestNodes);
 
             dijkstra(nearestNodes.at(0), G, predecessors, distance);
-            vector<long long> reachablePath;
+            stack<long long> reachablePath;
             double reachableDistance = INF;
-            // reachable = buildPath(nearestNodes.at(1), reachablePath, reachableDistance, predecessors, distance);
+            reachable = buildPath(nearestNodes.at(1), reachablePath, reachableDistance, predecessors, distance);
             if (!reachable) break;
-
+            predecessors.clear();
+            distance.clear();
 
             dijkstra(nearestNodes.at(0), G, predecessors, distance);
-            // destReach1 = buildPath(nearestNodes.at(2), reachablePath, path1Distance, predecessors, distance);
+            destReach1 = buildPath(nearestNodes.at(2), path1, path1Distance, predecessors, distance);
             if (!destReach1) continue;
+            predecessors.clear();
+            distance.clear();
 
             dijkstra(nearestNodes.at(1), G, predecessors, distance);
-            // destReach2 = buildPath(nearestNodes.at(2), reachablePath, path2Distance, predecessors, distance);
+            destReach2 = buildPath(nearestNodes.at(2), path2, path2Distance, predecessors, distance);
             if (!destReach2) continue;
+            predecessors.clear();
+            distance.clear();
 
-
-        } while (destReach1 && destReach2);
+        } while (!destReach1 && !destReach2);
         
-
         outputBuildings(building1, building2, destination);
         cout << endl;
         outputClosestNodes(nearestNodes, Nodes);
 
         if (!reachable){
-            cout << "Sorry, destination unreachable.\n";
+            cout << "\nSorry, destination unreachable.\n";
         }
+        else{
+            cout << "\nPerson 1's distance to dest: " << path1Distance << " miles\n";
+            printPath(path1);
 
-        //
-        // another navigation?
-        //
+            cout << "\nPerson 2's distance to dest: " << path2Distance << " miles\n";
+            printPath(path2);
+        }
+        
         cout << endl;
         cout << "Enter person 1's building (partial name or abbreviation), or #> ";
         getline(cin, person1Building);
