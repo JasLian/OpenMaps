@@ -101,7 +101,6 @@ class graph {
         // frees all allocated memory of each Edge node
         //
         ~graph(){
-            
             for (auto& pair : this->adjList){
 
                 Edge* currEdge = pair.second;
@@ -115,6 +114,9 @@ class graph {
                     delete temp;
                 }
             }
+
+            this->adjList.clear();
+            this->totEdges = 0;
 
         }
 
