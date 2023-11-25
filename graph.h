@@ -35,6 +35,7 @@ class graph {
         };
 
         map<VertexT, Edge*> adjList;
+        int totEdges = 0;
 
         //
         // _LookupVertex
@@ -42,6 +43,7 @@ class graph {
         int _LookupVertex(VertexT v) const {
             return adjList.count(v);
         }
+
 
     public:
         //
@@ -86,18 +88,7 @@ class graph {
         // Returns the # of edges currently in the graph.
         //
         int NumEdges() const {
-            int count = 0;
-
-            for (const auto& pair : this->adjList){
-                Edge* currEdge = pair.second;
-
-                while (currEdge){
-                    count++;
-                    currEdge = currEdge->next;
-                }
-            }
-
-            return count;
+            return this->totEdges;
         }
 
         //
@@ -132,13 +123,11 @@ class graph {
         //
         bool addEdge(VertexT from, VertexT to, WeightT weight) {
             
-            int exists = _LookupVertex(from);
-            if (exists == 0) {  // from vertex not found:
+            if (!_LookupVertex(from)) {  // from vertex not found:
                 return false;
             }
 
-            exists = _LookupVertex(to);
-            if (exists == 0) {  // to vertex not found:
+            if (!_LookupVertex(to)) {  // to vertex not found:
                 return false;
             }
 
@@ -146,12 +135,14 @@ class graph {
             newEdge->edgeWeight = weight;
             newEdge->vertexId = to;
 
-            if (!this->adjList[from]){
-                this->adjList[from] = newEdge;
+            this->totEdges++;
+
+            if (!this->adjList.at(from)){
+                this->adjList.at(from) = newEdge;
             }
             else{
 
-                Edge* currEdge = this->adjList[from];
+                Edge* currEdge = this->adjList.at(from);
 
                 while (currEdge->next){
                     
@@ -194,13 +185,11 @@ class graph {
             // of each vertex; this will denote the row and col to
             // access in the adjacency matrix:
             //
-            int exists = _LookupVertex(from);
-            if (exists == 0) {  // from vertex not found:
+            if (!_LookupVertex(from)) {  // from vertex not found:
                 return false;
             }
 
-            exists = _LookupVertex(to);
-            if (exists == 0) {  // to vertex not found:
+            if (!_LookupVertex(to)) {  // to vertex not found:
                 return false;
             }
 
@@ -237,8 +226,7 @@ class graph {
         set<VertexT> neighbors(VertexT v) const {
             set<VertexT>  S;
 
-            int exists = _LookupVertex(v);
-            if (exists == 0) {  // vertex not found:
+            if (!_LookupVertex(v)) {  // vertex not found:
                 return S;
             }
 
