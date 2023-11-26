@@ -1,17 +1,7 @@
-// graph.h <Starter Code>
-// < Your name >
+// graph.h - final implementation
+// Jasoon Liang
 //
-// Basic graph class using adjacency matrix representation.  Currently
-// limited to a graph with at most 100 vertices.
-//
-//
-// Adam T Koehler, PhD
-// University of Illinois Chicago
-// CS 251, Fall 2023
-//
-// Project Original Variartion By:
-// Joe Hummel, PhD
-// University of Illinois at Chicago
+// Basic graph class graph using adjaceny list representation.  
 //
 
 #pragma once
@@ -28,18 +18,20 @@ template<typename VertexT, typename WeightT>
 class graph {
     private:
     
+        //Basic struct representating an edge in a graph
         struct Edge{
-            WeightT edgeWeight;
-            VertexT vertexId;
-            Edge* next = nullptr;
+            WeightT edgeWeight; //edge's weight
+            VertexT vertexId; //vertex linked to the original vertex
+            Edge* next = nullptr; //linked list for adjaceny list implementation
             
         };
 
-        map<VertexT, Edge*> adjList;
+        map<VertexT, Edge*> adjList; //map storing the adjaceny list
         int totEdges = 0;
 
         //
         // _LookupVertex
+        // searches if a vertex already exists by searcing through the map
         //
         int _LookupVertex(VertexT v) const {
             return adjList.count(v);
@@ -47,19 +39,25 @@ class graph {
 
 
     public:
+
         //
         // default constructor:
         //
         graph() {}
 
+        //copy constructor:
+        //creates a deep copy of an existing graph
         graph(const graph& other){
-            this->~graph();
 
+            this->~graph(); //destroys/clears the current graph
+
+            //gets all the vertex from the other graph, and adds them to the current graph
             vector<VertexT> vertices = other.getVertices();
             for (VertexT vertex : vertices){
                 this->addVertex(vertex);
             }
 
+            //finds all the neighbors of each vertex, and adds the edges to the graph
             for (VertexT vertex : vertices){
 
                 set<VertexT> neighbors = other.neighbors(vertex);
@@ -73,14 +71,19 @@ class graph {
             }
         }
 
+        //assignment operator:
+        //creates a deep copy of an existing graph
         graph operator=(const graph& other){
-            this->~graph();
 
+            this->~graph(); //destroys/clears the current graph
+
+            //gets all the vertex from the other graph, and adds them to the current graph
             vector<VertexT> vertices = other.getVertices();
             for (VertexT vertex : vertices){
                 this->addVertex(vertex);
             }
 
+            //finds all the neighbors of each vertex, and adds the edges to the graph
             for (VertexT vertex : vertices){
 
                 set<VertexT> neighbors = other.neighbors(vertex);
@@ -96,10 +99,8 @@ class graph {
             return *(this);
         }
 
-        //
         // destructor:
         // frees all allocated memory of each Edge node
-        //
         ~graph(){
             for (auto& pair : this->adjList){
 
@@ -146,15 +147,12 @@ class graph {
         //
         bool addVertex(VertexT v) {
 
-            //
-            // is the vertex already in the graph?  If so, we do not
-            // insert again otherwise Vertices may fill with duplicates:
-            //
+            // checks if the vertex already exists to avoid inserting duplicates
             if (_LookupVertex(v) == 1) {
                 return false;
             }
 
-            this->adjList.emplace(v, nullptr);
+            this->adjList.emplace(v, nullptr); // inserts the vertex
 
             return true;
         }
@@ -165,7 +163,7 @@ class graph {
         // Adds the edge (from, to, weight) to the graph, and returns
         // true.  If the vertices do not exist, false is returned.
         //
-        // NOTE: if the edge already exists, the existing edge weight
+        // if the edge already exists, the existing edge weight
         // is overwritten with the new edge weight.
         //
         bool addEdge(VertexT from, VertexT to, WeightT weight) {
@@ -178,10 +176,12 @@ class graph {
                 return false;
             }
 
+            // create a new edge
             Edge* newEdge = new Edge();
             newEdge->edgeWeight = weight;
             newEdge->vertexId = to;
 
+            // case for adding an edge the first time
             if (!this->adjList.at(from)){
                 this->adjList.at(from) = newEdge;
             }
@@ -189,6 +189,8 @@ class graph {
 
                 Edge* currEdge = this->adjList.at(from);
 
+                // loop through the linked list to find the appropriate place to add the new edge
+                // and if the edge already exists, its weight is overridden
                 while (currEdge->next){
                     
                     if (currEdge->vertexId == to){
@@ -226,22 +228,17 @@ class graph {
         // returned.
         //
         bool getWeight(VertexT from, VertexT to, WeightT& weight) const {
-            //
-            // we need to search the Vertices and find the position
-            // of each vertex; this will denote the row and col to
-            // access in the adjacency matrix:
-            //
-            if (!_LookupVertex(from)) {  // from vertex not found:
+            
+            // checks if both vertices exists in the graph
+            if (!_LookupVertex(from)) {  
                 return false;
             }
 
-            if (!_LookupVertex(to)) {  // to vertex not found:
+            if (!_LookupVertex(to)) { 
                 return false;
             }
 
-            //
-            // the vertices exist, but does the edge exist?
-            //
+            // attempts to find the edge and change the weight parameter
             if (!this->adjList.at(from)){
                 return false;
             }
@@ -272,7 +269,7 @@ class graph {
         set<VertexT> neighbors(VertexT v) const {
             set<VertexT>  S;
 
-            if (!_LookupVertex(v)) {  // vertex not found:
+            if (!_LookupVertex(v)) {  // vertex not found
                 return S;
             }
 
