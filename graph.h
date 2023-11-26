@@ -2,7 +2,6 @@
 // Jasoon Liang
 //
 // Basic graph class graph using adjaceny list representation.  
-//
 
 #pragma once
 
