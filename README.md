@@ -14,7 +14,7 @@ The path returned is a list of path nodes collected using the map data, along wi
 
 ## Files
 
-application.cpp - The main file of the project. Contains the main functionality of the project.
+*application.cpp - The main file of the project. Contains the main functionality of the project.
 graph.h - An implementation of a graph as an adjaceny list. Used to store the map data.
 dist.cpp - Contains helper functions to calculate distance between points
 osm.cpp, tinyxml2.cpp - Used to extract information from map data
