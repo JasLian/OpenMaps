@@ -19,3 +19,4 @@ The path returned is a list of path nodes collected using the map data, along wi
 * dist.cpp - Contains helper functions to calculate distance between points
 * osm.cpp, tinyxml2.cpp - Used to extract information from map data
 * map.osm, uic.osm - Map data files
+* application.exe - An compliled executeable of the project
